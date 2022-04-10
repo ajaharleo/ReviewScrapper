@@ -3,11 +3,12 @@ from flask_cors import CORS,cross_origin
 import requests
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
+import csv
 
 app = Flask(__name__)
 
 @app.route('/',methods=['GET'])  # route to display the home page
-@cross_origin()
+@cross_origin()     #  to use the function across any location
 def homePage():
     return render_template("index.html")
 
@@ -33,9 +34,11 @@ def index():
             commentboxes = prod_html.find_all('div', {'class': "_16PBlm"})
 
             filename = searchString + ".csv"
-            fw = open(filename, "w")
+            '''fw = open(filename, "w")
             headers = "Product, Customer Name, Rating, Heading, Comment \n"
             fw.write(headers)
+            fw.close()'''
+
             reviews = []
             for commentbox in commentboxes:
                 try:
@@ -69,6 +72,10 @@ def index():
                 mydict = {"Product": searchString, "Name": name, "Rating": rating, "CommentHead": commentHead,
                           "Comment": custComment}
                 reviews.append(mydict)
+                csvfile = open(filename, 'w', encoding='UTF8', newline='')
+                csvwriter = csv.writer(csvfile)
+                for i in reviews:
+                    csvwriter.writerow([i])
             return render_template('results.html', reviews=reviews[0:(len(reviews)-1)])
         except Exception as e:
             print('The Exception message is: ',e)
